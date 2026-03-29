@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="Services/AdminService/AdminService.csproj" />
+  <Project Path="Services/AuthService/AuthService.csproj" />
+  <Project Path="Services/ClaimsService/ClaimsService.csproj" />
+  <Project Path="Services/PolicyService/PolicyService.csproj" />
+  <Project Path="Shared/SharedKernel/SharedKernel.csproj" />
+</Solution>
