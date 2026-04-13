@@ -10,6 +10,8 @@ import {
   RecordPaymentRequest,
   RecordFailedPaymentRequest
 } from '../models/payment.models';
+import { PaymentStatus } from '../models/payment.models';
+declare var Razorpay: any;
 
 @Injectable({
   providedIn: 'root'
@@ -66,34 +68,88 @@ export class PaymentService {
    * This creates a mock order and immediately verifies it with dummy data
    * No real payment gateway is involved
    */
-  processDemoPayment(policyId: string, amount: number): Observable<Payment> {
-    // First create the mock order
-    return new Observable(observer => {
-      this.createMockPaymentOrder(policyId, amount).subscribe({
-        next: (orderResponse) => {
-          // Generate dummy payment data
-          const dummyPaymentData: VerifyRazorpayPaymentRequest = {
-            policyId: policyId,
-            razorpayOrderId: orderResponse.orderId,
-            razorpayPaymentId: `pay_demo_${Date.now()}`,
-            razorpaySignature: `sig_demo_${Date.now()}`
-          };
-
-          // Verify the mock payment
-          this.verifyMockPayment(dummyPaymentData).subscribe({
-            next: (payment) => {
-              observer.next(payment);
-              observer.complete();
-            },
-            error: (error) => {
-              observer.error(error);
+  /**
+ * Process payment using Razorpay checkout
+ * This will show the actual Razorpay popup with test mode
+ */
+processDemoPayment(policyId: string, amount: number): Observable<Payment> {
+  return new Observable(observer => {
+    // Step 1: Create Razorpay order from backend
+    this.createMockPaymentOrder(policyId, amount).subscribe({
+      next: (orderResponse) => {
+        // Step 2: Open Razorpay checkout with the keyId from backend
+        const options = {
+          key: orderResponse.keyId, // Use keyId from backend response
+          amount: orderResponse.amount,
+          currency: orderResponse.currency,
+          name: 'SmartSure Insurance',
+          description: 'Insurance Policy Payment',
+          order_id: orderResponse.orderId,
+          handler: (response: any) => {
+            // Step 3: Verify payment with backend
+            const verifyData: VerifyRazorpayPaymentRequest = {
+              policyId: policyId,
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+              paymentMethod: 'Razorpay'
+            };
+            
+            this.verifyMockPayment(verifyData).subscribe({
+              next: (payment) => {
+                observer.next(payment);
+                observer.complete();
+              },
+              error: (err) => {
+                observer.error(err);
+              }
+            });
+          },
+          prefill: {
+            name: 'Test Customer',
+            email: 'test@example.com',
+            contact: '9999999999'
+          },
+          theme: {
+            color: '#667eea'
+          },
+          modal: {
+            ondismiss: () => {
+              observer.error(new Error('Payment cancelled by user'));
             }
-          });
-        },
-        error: (error) => {
-          observer.error(error);
-        }
-      });
+          },
+          config: {
+            display: {
+              blocks: {
+                banks: {
+                  name: 'All payment methods',
+                  instruments: [
+                    {
+                      method: 'netbanking'
+                    },
+                    {
+                      method: 'card'
+                    },
+                    {
+                      method: 'upi'
+                    }
+                  ]
+                }
+              },
+              sequence: ['block.banks'],
+              preferences: {
+                show_default_blocks: true
+              }
+            }
+          }
+        };
+        
+        const razorpay = new Razorpay(options);
+        razorpay.open();
+      },
+      error: (err) => {
+        observer.error(err);
+      }
     });
-  }
-}
+  });
+}}

@@ -29,7 +29,8 @@ export interface RazorpayOrderResponse {
   orderId: string;
   amount: number;
   currency: string;
-  razorpayKey: string;
+  keyId: string; // Changed from razorpayKey to keyId to match backend
+  policyId: string;
 }
 
 export interface VerifyRazorpayPaymentRequest {
@@ -37,6 +38,7 @@ export interface VerifyRazorpayPaymentRequest {
   razorpayOrderId: string;
   razorpayPaymentId: string;
   razorpaySignature: string;
+  paymentMethod: string; // Added to match backend DTO
 }
 
 export interface RecordPaymentRequest {

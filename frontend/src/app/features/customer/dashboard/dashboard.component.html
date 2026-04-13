@@ -1,0 +1,205 @@
+<div class="dashboard-layout">
+  <app-navbar></app-navbar>
+
+  <div class="dashboard-container">
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+      <h1>Welcome back, {{ userName }}!</h1>
+      <p>Manage your insurance policies and claims</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+      <mat-card class="stat-card">
+        <div class="stat-icon" style="background: #e3f2fd;">
+          <mat-icon style="color: #1976d2;">description</mat-icon>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value">{{ stats.totalPolicies }}</div>
+          <div class="stat-label">Total Policies</div>
+        </div>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <div class="stat-icon" style="background: #e8f5e9;">
+          <mat-icon style="color: #388e3c;">check_circle</mat-icon>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value">{{ stats.activePolicies }}</div>
+          <div class="stat-label">Active Policies</div>
+        </div>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <div class="stat-icon" style="background: #fff3e0;">
+          <mat-icon style="color: #f57c00;">assignment</mat-icon>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value">{{ stats.totalClaims }}</div>
+          <div class="stat-label">Total Claims</div>
+        </div>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <div class="stat-icon" style="background: #fce4ec;">
+          <mat-icon style="color: #c2185b;">pending</mat-icon>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value">{{ stats.pendingClaims }}</div>
+          <div class="stat-label">Pending Claims</div>
+        </div>
+      </mat-card>
+    </div>
+
+    <!-- Quick Actions -->
+    <mat-card class="quick-actions-card">
+      <h2>Quick Actions</h2>
+      <div class="actions-grid">
+        <button mat-raised-button color="primary" routerLink="/customer/buy-policy">
+          <mat-icon>add_shopping_cart</mat-icon>
+          Buy New Policy
+        </button>
+        <button mat-raised-button color="accent" routerLink="/customer/initiate-claim">
+          <mat-icon>assignment_add</mat-icon>
+          File a Claim
+        </button>
+        <button mat-stroked-button routerLink="/customer/policies">
+          <mat-icon>description</mat-icon>
+          View All Policies
+        </button>
+        <button mat-stroked-button routerLink="/customer/claims">
+          <mat-icon>assignment</mat-icon>
+          View All Claims
+        </button>
+      </div>
+    </mat-card>
+
+    <!-- Recent Policies -->
+    <mat-card class="content-card">
+      <div class="card-header">
+        <h2>Recent Policies</h2>
+        <button mat-button routerLink="/customer/policies">
+          View All
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </div>
+
+      <div class="table-container" *ngIf="recentPolicies.length > 0">
+        <table mat-table [dataSource]="recentPolicies" class="policies-table">
+          <ng-container matColumnDef="policyNumber">
+            <th mat-header-cell *matHeaderCellDef>Policy Number</th>
+            <td mat-cell *matCellDef="let policy">
+              {{ policy.formattedPolicyId || policy.policyNumber || policy.policyId }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef>Type</th>
+            <td mat-cell *matCellDef="let policy">
+              {{ policy.subtypeName || policy.insuranceSubtype?.name || policy.typeName || 'N/A' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="premium">
+            <th mat-header-cell *matHeaderCellDef>Premium</th>
+            <td mat-cell *matCellDef="let policy">
+              ${{ (policy.premiumAmount || 0) | number:'1.2-2' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let policy">
+              <app-status-badge [status]="policy.status"></app-status-badge>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let policy">
+              <button mat-icon-button [routerLink]="['/customer/policies', policy.policyId]">
+                <mat-icon>visibility</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="policyColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: policyColumns;"></tr>
+        </table>
+      </div>
+
+      <div class="empty-state" *ngIf="recentPolicies.length === 0">
+        <mat-icon>description</mat-icon>
+        <p>No policies yet</p>
+        <button mat-raised-button color="primary" routerLink="/customer/buy-policy">
+          Buy Your First Policy
+        </button>
+      </div>
+    </mat-card>
+
+    <!-- Recent Claims -->
+    <mat-card class="content-card">
+      <div class="card-header">
+        <h2>Recent Claims</h2>
+        <button mat-button routerLink="/customer/claims">
+          View All
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </div>
+
+      <div class="table-container" *ngIf="recentClaims.length > 0">
+        <table mat-table [dataSource]="recentClaims" class="claims-table">
+          <ng-container matColumnDef="claimNumber">
+            <th mat-header-cell *matHeaderCellDef>Claim Number</th>
+            <td mat-cell *matCellDef="let claim">
+              {{ claim.formattedClaimId || claim.claimNumber || claim.claimId || 'N/A' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef>Type</th>
+            <td mat-cell *matCellDef="let claim">
+              {{ claim.claimType || 'General' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="amount">
+            <th mat-header-cell *matHeaderCellDef>Amount</th>
+            <td mat-cell *matCellDef="let claim">
+              ${{ (claim.claimAmount || claim.claimedAmount || 0) | number:'1.2-2' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let claim">
+              <app-status-badge [status]="claim.status"></app-status-badge>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let claim">
+              <button mat-icon-button [routerLink]="['/customer/claims', claim.claimId]">
+                <mat-icon>visibility</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="claimColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: claimColumns;"></tr>
+        </table>
+      </div>
+
+      <div class="empty-state" *ngIf="recentClaims.length === 0">
+        <mat-icon>assignment</mat-icon>
+        <p>No claims yet</p>
+        <button mat-raised-button color="accent" routerLink="/customer/initiate-claim">
+          File Your First Claim
+        </button>
+      </div>
+    </mat-card>
+  </div>
+
+  <app-footer></app-footer>
+</div>

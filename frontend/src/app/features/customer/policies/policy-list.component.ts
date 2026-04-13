@@ -79,8 +79,8 @@ import { Policy } from '../../../models/policy.models';
                 <mat-icon>{{ getIconForType(policy.insuranceSubtype?.name || '') }}</mat-icon>
               </div>
               <div class="policy-info">
-                <h3>{{ policy.insuranceSubtype?.name || 'Insurance Policy' }}</h3>
-                <p class="policy-number">{{ policy.policyNumber }}</p>
+                <h3>{{ policy.subtypeName || policy.insuranceSubtype?.name || policy.typeName || 'Insurance Policy' }}</h3>
+                <p class="policy-number">{{ policy.formattedPolicyId || policy.policyNumber || policy.policyId }}</p>
               </div>
               <app-status-badge [status]="policy.status"></app-status-badge>
             </div>
@@ -90,7 +90,7 @@ import { Policy } from '../../../models/policy.models';
                 <mat-icon>account_balance_wallet</mat-icon>
                 <div>
                   <span class="label">Coverage (IDV)</span>
-                  <span class="value">₹{{ policy.idv }}</span>
+                  <span class="value">₹{{ policy.insuredDeclaredValue || policy.idv || 0 }}</span>
                 </div>
               </div>
 
@@ -383,9 +383,10 @@ export class PolicyListComponent implements OnInit {
 
   applyFilters(): void {
     this.filteredPolicies = this.policies.filter(policy => {
-      const typeName = policy.insuranceSubtype?.name || '';
+      const typeName = policy.subtypeName || policy.insuranceSubtype?.name || policy.typeName || '';
+      const policyNumber = policy.formattedPolicyId || policy.policyNumber || policy.policyId || '';
       const matchesSearch = !this.searchTerm || 
-        policy.policyNumber.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        policyNumber.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         typeName.toLowerCase().includes(this.searchTerm.toLowerCase());
       
       const matchesStatus = !this.statusFilter || policy.status === this.statusFilter;

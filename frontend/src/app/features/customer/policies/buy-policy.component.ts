@@ -133,6 +133,10 @@ import { ToastrService } from 'ngx-toastr';
               <mat-card class="quote-card" *ngIf="quote">
                 <h3>Premium Breakdown</h3>
                 <div class="quote-item">
+                  <span>Coverage (IDV):</span>
+                  <span>₹{{ quote.idv || 0 }}</span>
+                </div>
+                <div class="quote-item">
                   <span>Base Premium:</span>
                   <span>₹{{ quote.basePremium }}</span>
                 </div>
@@ -143,10 +147,6 @@ import { ToastrService } from 'ngx-toastr';
                 <div class="quote-total">
                   <span>Total Premium:</span>
                   <span>₹{{ quote.totalPremium }}</span>
-                </div>
-                <div class="quote-item">
-                  <span>Coverage (IDV):</span>
-                  <span>₹{{ quote.idv }}</span>
                 </div>
                 <div class="quote-item">
                   <span>Valid From:</span>
@@ -178,7 +178,20 @@ import { ToastrService } from 'ngx-toastr';
               <mat-card class="payment-card">
                 <div class="payment-info">
                   <mat-icon>info</mat-icon>
-                  <p>This is a demo payment system. Click below to simulate successful payment.</p>
+                  <div>
+                    <p><strong>Razorpay Test Mode - No Real Money Charged</strong></p>
+                    <p style="margin-top: 8px;"><strong>How to complete test payment:</strong></p>
+                    <ol style="margin: 8px 0; padding-left: 20px; line-height: 1.8;">
+                      <li>Click the payment button below</li>
+                      <li>In the Razorpay popup, look for <strong>"Netbanking"</strong> or <strong>"Pay Later"</strong> options</li>
+                      <li>Select any bank from the list (e.g., HDFC, ICICI, SBI)</li>
+                      <li>Use test credentials when prompted</li>
+                      <li>Payment will succeed automatically in test mode</li>
+                    </ol>
+                    <p style="margin-top: 8px; font-size: 12px; color: #666;">
+                      💡 If you see "Show All Options", click it to see Netbanking
+                    </p>
+                  </div>
                 </div>
 
                 <div class="payment-summary" *ngIf="quote">
@@ -189,8 +202,8 @@ import { ToastrService } from 'ngx-toastr';
                 <button mat-raised-button color="accent" class="payment-button"
                         (click)="processPayment()" [disabled]="isProcessing">
                   <mat-spinner diameter="20" *ngIf="isProcessing"></mat-spinner>
-                  <mat-icon *ngIf="!isProcessing">check_circle</mat-icon>
-                  {{ isProcessing ? 'Processing...' : 'Complete Demo Payment' }}
+                  <mat-icon *ngIf="!isProcessing">payment</mat-icon>
+                  {{ isProcessing ? 'Processing...' : 'Pay with Razorpay (Test Mode)' }}
                 </button>
               </mat-card>
 
@@ -349,7 +362,7 @@ import { ToastrService } from 'ngx-toastr';
 
     .payment-info {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 12px;
       background: #e3f2fd;
       padding: 16px;
@@ -362,6 +375,34 @@ import { ToastrService } from 'ngx-toastr';
       font-size: 32px;
       width: 32px;
       height: 32px;
+      flex-shrink: 0;
+      margin-top: 4px;
+    }
+
+    .payment-info p {
+      margin: 0;
+      color: #1976d2;
+      line-height: 1.6;
+    }
+
+    .payment-info ul,
+    .payment-info ol {
+      color: #1976d2;
+      line-height: 1.6;
+    }
+
+    .payment-info li {
+      margin: 4px 0;
+    }
+
+    .payment-info code {
+      background: rgba(0,0,0,0.15);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-weight: 600;
+      font-size: 13px;
+      color: #0d47a1;
     }
 
     .payment-summary {
@@ -417,7 +458,7 @@ export class BuyPolicyComponent implements OnInit {
   insuranceTypes: InsuranceType[] = [];
   subtypes: InsuranceSubtype[] = [];
   selectedTypeId = '';
-  quote: QuoteResponse | null = null;
+  quote: any | null = null;
   isProcessing = false;
 
   ngOnInit(): void {
@@ -475,58 +516,124 @@ export class BuyPolicyComponent implements OnInit {
   }
 
   getQuote(): void {
-    if (!this.policyForm.valid) return;
+  if (!this.policyForm.valid) return;
 
-    const data = {
-      subtypeId: this.policyForm.value.subtypeId,
-      duration: this.policyForm.value.duration,
-      couponCode: this.policyForm.value.couponCode || undefined
+  const selectedType = this.insuranceTypes.find(t => t.typeId === this.selectedTypeId);
+  const requestData: any = {
+    subtypeId: this.policyForm.value.subtypeId,
+    duration: this.policyForm.value.duration,
+    couponCode: this.policyForm.value.couponCode || undefined
+  };
+
+  // Add dummy vehicle/home details if needed - using PascalCase for backend
+  if (selectedType?.name === 'Vehicle') {
+    requestData.vehicleDetail = {
+      RegistrationNumber: 'MH01AB1234',
+      Make: 'Mahindra',
+      Model: 'XUV700',
+      ManufactureYear: 2020,
+      EstimatedValue: 1500000,
+      ChassisNumber: 'CH1234567890',
+      EngineNumber: 'EN1234567890'
     };
-
-    this.policyService.getQuote(data).subscribe({
-      next: (quote) => {
-        this.quote = quote;
-      },
-      error: () => {
-        this.toastr.error('Failed to calculate quote');
-      }
-    });
+  } else if (selectedType?.name === 'Home') {
+    requestData.homeDetail = {
+      Address: '123 Main St',
+      PropertyType: 'Apartment',
+      YearBuilt: 2015,
+      AreaSqFt: 1200,
+      ConstructionCostPerSqFt: 2000,
+      SecurityFeatures: 'CCTV'
+    };
   }
+
+  this.policyService.getQuote(requestData).subscribe({
+    next: (response) => {
+      // Map backend response to frontend QuoteResponse interface
+      const totalPremium = response.premiumAmount;
+      const gst = totalPremium * 0.18; // 18% GST
+      const basePremium = totalPremium - gst;
+
+      this.quote = {
+        basePremium: basePremium,
+        gst: gst,
+        totalPremium: totalPremium,
+        idv: response.insuredDeclaredValue,
+        startDate: new Date().toISOString(),
+        endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString()
+      };
+      console.log('Quote calculated:', this.quote);
+    },
+    error: (err) => {
+      console.error('Quote error:', err);
+      this.toastr.error('Failed to calculate quote');
+    }
+  });
+}
 
   processPayment(): void {
     if (!this.quote) return;
 
     this.isProcessing = true;
 
-    const policyData = {
+    const selectedType = this.insuranceTypes.find(t => t.typeId === this.selectedTypeId);
+    const policyData: any = {
       subtypeId: this.policyForm.value.subtypeId,
       duration: this.policyForm.value.duration,
       couponCode: this.policyForm.value.couponCode || undefined
     };
 
+    // Add the same vehicle/home details used in quote calculation - using PascalCase for backend
+    if (selectedType?.name === 'Vehicle') {
+      policyData.vehicleDetail = {
+        RegistrationNumber: 'MH01AB1234',
+        Make: 'Mahindra',
+        Model: 'XUV700',
+        ManufactureYear: 2020,
+        EstimatedValue: 1500000,
+        ChassisNumber: 'CH1234567890',
+        EngineNumber: 'EN1234567890'
+      };
+    } else if (selectedType?.name === 'Home') {
+      policyData.homeDetail = {
+        Address: '123 Main St',
+        PropertyType: 'Apartment',
+        YearBuilt: 2015,
+        AreaSqFt: 1200,
+        ConstructionCostPerSqFt: 2000,
+        SecurityFeatures: 'CCTV'
+      };
+    }
+
+    // Step 1: Create the policy with vehicle/home details
     this.policyService.createPolicy(policyData).subscribe({
       next: (policy) => {
-        // Process demo payment
+        // Step 2: Process Razorpay payment (will show Razorpay popup)
         this.paymentService.processDemoPayment(
           policy.policyId,
           this.quote!.totalPremium
         ).subscribe({
           next: () => {
             this.isProcessing = false;
-            this.toastr.success('Policy purchased successfully!');
+            this.toastr.success(
+              'Payment successful! Your policy is now active.',
+              'Success',
+              { timeOut: 5000 }
+            );
             setTimeout(() => {
               this.router.navigate(['/customer/policies', policy.policyId]);
             }, 1500);
           },
-          error: () => {
+          error: (err) => {
             this.isProcessing = false;
-            this.toastr.error('Payment failed');
+            const errorMsg = err.message || 'Payment failed or cancelled';
+            this.toastr.error(errorMsg, 'Payment Error');
           }
         });
       },
       error: () => {
         this.isProcessing = false;
-        this.toastr.error('Failed to create policy');
+        this.toastr.error('Failed to create policy. Please try again.');
       }
     });
   }

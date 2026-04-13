@@ -57,22 +57,22 @@ export const routes: Routes = [
         path: 'buy-policy',
         loadComponent: () => import('./features/customer/policies/buy-policy.component').then(m => m.BuyPolicyComponent)
       },
-      // {
-      //   path: 'claims',
-      //   loadComponent: () => import('./features/customer/claims/claim-list/claim-list.component').then(m => m.ClaimListComponent)
-      // },
-      // {
-      //   path: 'claims/:id',
-      //   loadComponent: () => import('./features/customer/claims/claim-detail/claim-detail.component').then(m => m.ClaimDetailComponent)
-      // },
-      // {
-      //   path: 'initiate-claim',
-      //   loadComponent: () => import('./features/customer/claims/initiate-claim/initiate-claim.component').then(m => m.InitiateClaimComponent)
-      // },
-      // {
-      //   path: 'profile',
-      //   loadComponent: () => import('./features/customer/profile/profile.component').then(m => m.ProfileComponent)
-      // }
+      {
+        path: 'claims',
+        loadComponent: () => import('./features/customer/claims/claim-list.component').then(m => m.ClaimListComponent)
+      },
+      {
+        path: 'claims/:id',
+        loadComponent: () => import('./features/customer/claims/claim-detail.component').then(m => m.ClaimDetailComponent)
+      },
+      {
+        path: 'initiate-claim',
+        loadComponent: () => import('./features/customer/claims/initiate-claim.component').then(m => m.InitiateClaimComponent)
+      },
+      {
+        path: 'profile',
+        loadComponent: () => import('./features/customer/profile/profile.component').then(m => m.ProfileComponent)
+      }
     ]
   },
   {
@@ -80,46 +80,50 @@ export const routes: Routes = [
     canActivate: [authGuard, adminGuard],
     children: [
       // TODO: Uncomment these routes as components are created
-      // {
-      //   path: 'dashboard',
-      //   loadComponent: () => import('./features/admin/dashboard/dashboard.component').then(m => m.AdminDashboardComponent)
-      // },
-      // {
-      //   path: 'policies',
-      //   loadComponent: () => import('./features/admin/policies/policy-list/policy-list.component').then(m => m.AdminPolicyListComponent)
-      // },
-      // {
-      //   path: 'insurance-types',
-      //   loadComponent: () => import('./features/admin/policies/insurance-management/insurance-management.component').then(m => m.InsuranceManagementComponent)
-      // },
-      // {
-      //   path: 'discounts',
-      //   loadComponent: () => import('./features/admin/discounts/discount-management/discount-management.component').then(m => m.DiscountManagementComponent)
-      // },
-      // {
-      //   path: 'claims',
-      //   loadComponent: () => import('./features/admin/claims/claim-list/claim-list.component').then(m => m.AdminClaimListComponent)
-      // },
-      // {
-      //   path: 'claims/:id/review',
-      //   loadComponent: () => import('./features/admin/claims/claim-review/claim-review.component').then(m => m.ClaimReviewComponent)
-      // },
-      // {
-      //   path: 'users',
-      //   loadComponent: () => import('./features/admin/users/user-list/user-list.component').then(m => m.UserListComponent)
-      // },
-      // {
-      //   path: 'reports',
-      //   loadComponent: () => import('./features/admin/reports/report-list/report-list.component').then(m => m.ReportListComponent)
-      // },
-      // {
-      //   path: 'reports/generate',
-      //   loadComponent: () => import('./features/admin/reports/generate-report/generate-report.component').then(m => m.GenerateReportComponent)
-      // },
-      // {
-      //   path: 'audit-logs',
-      //   loadComponent: () => import('./features/admin/audit-logs/audit-logs.component').then(m => m.AuditLogsComponent)
-      // }
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./features/admin/dashboard/dashboard.component').then(m => m.AdminDashboardComponent)
+      },
+      {
+        path: 'analytics',
+        loadComponent: () => import('./features/admin/analytics/analytics-dashboard.component').then(m => m.AnalyticsDashboardComponent)
+      },
+      {
+        path: 'policies',
+        loadComponent: () => import('./features/admin/policies/policy-list/policy-list.component').then(m => m.AdminPolicyListComponent)
+      },
+      {
+        path: 'insurance-types',
+        loadComponent: () => import('./features/admin/policies/insurance-management/insurance-management.component').then(m => m.InsuranceManagementComponent)
+      },
+      {
+        path: 'discounts',
+        loadComponent: () => import('./features/admin/discounts/discount-management/discount-management.component').then(m => m.DiscountManagementComponent)
+      },
+      {
+        path: 'claims',
+        loadComponent: () => import('./features/admin/claims/claim-list/claim-list.component').then(m => m.AdminClaimListComponent)
+      },
+      {
+        path: 'claims/:id/review',
+        loadComponent: () => import('./features/admin/claims/claim-review/claim-review.component').then(m => m.ClaimReviewComponent)
+      },
+      {
+        path: 'users',
+        loadComponent: () => import('./features/admin/users/user-list/user-list.component').then(m => m.UserListComponent)
+      },
+      {
+        path: 'reports',
+        loadComponent: () => import('./features/admin/reports/report-list/report-list.component').then(m => m.ReportListComponent)
+      },
+      {
+        path: 'reports/generate',
+        loadComponent: () => import('./features/admin/reports/generate-report/generate-report.component').then(m => m.GenerateReportComponent)
+      },
+      {
+        path: 'audit-logs',
+        loadComponent: () => import('./features/admin/audit-logs/audit-logs.component').then(m => m.AuditLogsComponent)
+      }
     ]
   },
   {

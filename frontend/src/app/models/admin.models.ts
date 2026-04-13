@@ -12,40 +12,51 @@ export interface DashboardStats {
 export interface Report {
   reportId: string;
   title: string;
+  reportName?: string; // Alias for title
   reportType: string;
   generatedBy: string;
   generatedAt: string;
   content: string;
   parameters?: any;
+  startDate?: string;
+  endDate?: string;
+  status?: string;
 }
 
 export interface ReportRequest {
   reportType: string;
-  title: string;
+  title?: string;
+  reportName?: string;
   startDate?: string;
   endDate?: string;
+  format?: string;
   parameters?: any;
+  options?: any;
 }
 
 export interface AuditLog {
   logId: string;
   userId: string;
+  userName?: string;
   action: string;
   entityType: string;
   entityId: string;
-  changes: string;
-  ipAddress: string;
+  description?: string;
+  changes?: string;
+  ipAddress?: string;
   timestamp: string;
 }
 
 export interface AdminUser {
   userId: string;
+  formattedUserId?: string;
   firstName: string;
   lastName: string;
+  fullName?: string;
   email: string;
-  phoneNumber: string;
+  phoneNumber?: string;
   role: string;
-  isEmailVerified: boolean;
+  isEmailVerified?: boolean;
   createdAt: string;
   policiesCount?: number;
   claimsCount?: number;

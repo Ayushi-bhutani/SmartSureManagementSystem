@@ -8,6 +8,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../../../core/services/auth.service';
 import { User } from '../../../models/auth.models';
+import { NotificationPanelComponent } from '../notification-panel/notification-panel.component';
 
 @Component({
   selector: 'app-navbar',
@@ -19,7 +20,8 @@ import { User } from '../../../models/auth.models';
     MatButtonModule,
     MatIconModule,
     MatMenuModule,
-    MatDividerModule
+    MatDividerModule,
+    NotificationPanelComponent
   ],
   template: `
     <mat-toolbar color="primary" class="navbar">
@@ -58,6 +60,10 @@ import { User } from '../../../models/auth.models';
               <mat-icon>dashboard</mat-icon>
               Dashboard
             </button>
+            <button mat-button routerLink="/admin/analytics" routerLinkActive="active">
+              <mat-icon>analytics</mat-icon>
+              Analytics
+            </button>
             <button mat-button routerLink="/admin/policies" routerLinkActive="active">
               <mat-icon>description</mat-icon>
               Policies
@@ -93,6 +99,9 @@ import { User } from '../../../models/auth.models';
               </button>
             </mat-menu>
           </ng-container>
+
+          <!-- Notifications -->
+          <app-notification-panel></app-notification-panel>
 
           <!-- User Menu -->
           <button mat-button [matMenuTriggerFor]="userMenu" class="user-menu-btn">

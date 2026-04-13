@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartSure - Clear Cache & Test Admin Login</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            color: #3f51b5;
+            margin-bottom: 10px;
+        }
+        h2 {
+            color: #666;
+            margin-top: 30px;
+            border-bottom: 2px solid #3f51b5;
+            padding-bottom: 10px;
+        }
+        .alert {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        .alert-warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+        }
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #28a745;
+            color: #155724;
+        }
+        .alert-info {
+            background: #d1ecf1;
+            border: 1px solid #17a2b8;
+            color: #0c5460;
+        }
+        .alert-danger {
+            background: #f8d7da;
+            border: 1px solid #dc3545;
+            color: #721c24;
+        }
+        button {
+            background: #3f51b5;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 10px 10px 0;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #303f9f;
+        }
+        button.danger {
+            background: #dc3545;
+        }
+        button.danger:hover {
+            background: #c82333;
+        }
+        button.success {
+            background: #28a745;
+        }
+        button.success:hover {
+            background: #218838;
+        }
+        .info-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #3f51b5;
+        }
+        .info-box pre {
+            background: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .step {
+            background: #e3f2fd;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border-left: 4px solid #2196f3;
+        }
+        .step strong {
+            color: #1976d2;
+        }
+        ol {
+            line-height: 1.8;
+        }
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #d63384;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 SmartSure Admin Login Fix</h1>
+        <p>This tool will help you fix the admin login issue by clearing browser cache and testing the login flow.</p>
+
+        <div class="alert alert-warning">
+            <strong>⚠️ IMPORTANT:</strong> The issue is caused by browser caching old JavaScript files. Follow the steps below to fix it.
+        </div>
+
+        <h2>Step 1: Clear Browser Cache</h2>
+        <div class="step">
+            <strong>Option A: Hard Refresh (Recommended)</strong>
+            <ol>
+                <li>Close all SmartSure tabs in your browser</li>
+                <li>Press <code>Ctrl + Shift + Delete</code> (Windows) or <code>Cmd + Shift + Delete</code> (Mac)</li>
+                <li>Select "Cached images and files"</li>
+                <li>Click "Clear data"</li>
+                <li>OR simply press <code>Ctrl + F5</code> on the login page</li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <strong>Option B: Clear SmartSure Data (Quick Fix)</strong>
+            <ol>
+                <li>Click the button below to clear all SmartSure data from localStorage</li>
+                <li>Then do a hard refresh with <code>Ctrl + F5</code></li>
+            </ol>
+            <button class="danger" onclick="clearAllData()">🗑️ Clear All SmartSure Data</button>
+        </div>
+
+        <h2>Step 2: Check Current Storage</h2>
+        <button onclick="checkStorage()">🔍 Check Current Storage</button>
+        <div id="storageInfo" class="info-box" style="display: none;">
+            <h3>Current Storage Contents:</h3>
+            <pre id="storageContent"></pre>
+        </div>
+
+        <h2>Step 3: Test Admin Login</h2>
+        <div class="info-box">
+            <strong>Admin Credentials:</strong><br>
+            Email: <code>admin@smartsure.com</code><br>
+            Password: <code>Admin@123</code>
+        </div>
+
+        <div class="step">
+            <strong>After clearing cache:</strong>
+            <ol>
+                <li>Go to <a href="http://localhost:4200/auth/login" target="_blank">http://localhost:4200/auth/login</a></li>
+                <li>Open browser DevTools (F12)</li>
+                <li>Go to Console tab</li>
+                <li>Login with admin credentials</li>
+                <li>Look for these console messages:
+                    <pre>👤 Role from login response: Admin
+🎭 Using role from login response: Admin
+✅ Normalized user: {..., role: 'Admin'}
+🔍 Verify - isAdmin(): true
+✅ Admin access granted</pre>
+                </li>
+                <li>You should be redirected to <code>/admin/dashboard</code></li>
+            </ol>
+        </div>
+
+        <h2>Step 4: Verify Admin Dashboard</h2>
+        <div class="step">
+            <strong>Expected Admin Dashboard Features:</strong>
+            <ul>
+                <li>✅ Statistics cards (Total Policies, Pending Claims, Total Users, Total Revenue)</li>
+                <li>✅ Quick action buttons (Review Claims, Manage Policies, Manage Users, View Reports)</li>
+                <li>✅ Recent claims table</li>
+                <li>✅ Admin navbar with: Dashboard | Analytics | Policies | Claims | Manage</li>
+            </ul>
+        </div>
+
+        <h2>Troubleshooting</h2>
+        <div class="alert alert-info">
+            <strong>If you still see the customer dashboard after login:</strong>
+            <ol>
+                <li>Check the console for error messages</li>
+                <li>Verify the role in console: <code>localStorage.getItem('smartsure_user')</code></li>
+                <li>Make sure you cleared cache with <code>Ctrl + F5</code></li>
+                <li>Try in an incognito/private window</li>
+                <li>Check that the backend is running on port 5000</li>
+            </ol>
+        </div>
+
+        <h2>Quick Actions</h2>
+        <button onclick="openLogin()">🔐 Open Login Page</button>
+        <button onclick="openAdminDashboard()">📊 Open Admin Dashboard</button>
+        <button onclick="openAnalytics()">📈 Open Analytics Dashboard</button>
+        <button class="success" onclick="testLoginFlow()">🧪 Test Login Flow</button>
+
+        <div id="testResult" style="margin-top: 20px;"></div>
+    </div>
+
+    <script>
+        function clearAllData() {
+            const keys = Object.keys(localStorage).filter(key => key.startsWith('smartsure_'));
+            keys.forEach(key => localStorage.removeItem(key));
+            
+            const result = document.getElementById('testResult');
+            result.innerHTML = `
+                <div class="alert alert-success">
+                    <strong>✅ Success!</strong> Cleared ${keys.length} items from localStorage.<br>
+                    <strong>Next steps:</strong>
+                    <ol>
+                        <li>Press <code>Ctrl + F5</code> to hard refresh the page</li>
+                        <li>Go to login page and login with admin credentials</li>
+                    </ol>
+                </div>
+            `;
+            
+            console.log('🗑️ Cleared SmartSure data:', keys);
+        }
+
+        function checkStorage() {
+            const storageInfo = document.getElementById('storageInfo');
+            const storageContent = document.getElementById('storageContent');
+            
+            const data = {};
+            Object.keys(localStorage).forEach(key => {
+                if (key.startsWith('smartsure_')) {
+                    try {
+                        data[key] = JSON.parse(localStorage.getItem(key));
+                    } catch {
+                        data[key] = localStorage.getItem(key);
+                    }
+                }
+            });
+            
+            storageInfo.style.display = 'block';
+            storageContent.textContent = JSON.stringify(data, null, 2);
+            
+            // Check if user is logged in and show role
+            const user = localStorage.getItem('smartsure_user');
+            if (user) {
+                try {
+                    const userData = JSON.parse(user);
+                    const result = document.getElementById('testResult');
+                    result.innerHTML = `
+                        <div class="alert alert-info">
+                            <strong>👤 Current User:</strong><br>
+                            Email: <code>${userData.email}</code><br>
+                            Role: <code>${userData.role}</code><br>
+                            Name: <code>${userData.firstName} ${userData.lastName}</code>
+                        </div>
+                    `;
+                } catch (e) {
+                    console.error('Error parsing user data:', e);
+                }
+            } else {
+                const result = document.getElementById('testResult');
+                result.innerHTML = `
+                    <div class="alert alert-warning">
+                        <strong>⚠️ No user logged in</strong><br>
+                        Please login first.
+                    </div>
+                `;
+            }
+        }
+
+        function openLogin() {
+            window.open('http://localhost:4200/auth/login', '_blank');
+        }
+
+        function openAdminDashboard() {
+            window.open('http://localhost:4200/admin/dashboard', '_blank');
+        }
+
+        function openAnalytics() {
+            window.open('http://localhost:4200/admin/analytics', '_blank');
+        }
+
+        function testLoginFlow() {
+            const result = document.getElementById('testResult');
+            result.innerHTML = `
+                <div class="alert alert-info">
+                    <strong>🧪 Testing Login Flow...</strong><br>
+                    <ol>
+                        <li>Checking if backend is running...</li>
+                        <li>Testing /auth/login endpoint...</li>
+                    </ol>
+                </div>
+            `;
+
+            // Test backend connectivity
+            fetch('http://localhost:5000/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: 'admin@smartsure.com',
+                    password: 'Admin@123'
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('✅ Login response:', data);
+                
+                result.innerHTML = `
+                    <div class="alert alert-success">
+                        <strong>✅ Backend Test Successful!</strong><br>
+                        <strong>Login Response:</strong>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                        <strong>Role from response:</strong> <code>${data.role || data.Role || 'NOT FOUND'}</code><br>
+                        <br>
+                        <strong>✅ Backend is working correctly!</strong><br>
+                        The issue is browser cache. Please:
+                        <ol>
+                            <li>Press <code>Ctrl + F5</code> to hard refresh</li>
+                            <li>Or clear cache and try again</li>
+                        </ol>
+                    </div>
+                `;
+            })
+            .catch(error => {
+                console.error('❌ Backend test failed:', error);
+                
+                result.innerHTML = `
+                    <div class="alert alert-danger">
+                        <strong>❌ Backend Test Failed!</strong><br>
+                        Error: <code>${error.message}</code><br>
+                        <br>
+                        <strong>Possible causes:</strong>
+                        <ol>
+                            <li>Backend is not running (start with <code>dotnet run</code>)</li>
+                            <li>Backend is running on a different port</li>
+                            <li>CORS is blocking the request</li>
+                            <li>Admin user doesn't exist in database</li>
+                        </ol>
+                    </div>
+                `;
+            });
+        }
+
+        // Auto-check storage on page load
+        window.addEventListener('load', () => {
+            checkStorage();
+        });
+    </script>
+</body>
+</html>

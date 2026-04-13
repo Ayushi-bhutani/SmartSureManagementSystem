@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Check User Role</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #667eea;
+            margin-top: 0;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        .result {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            font-family: monospace;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        .warning {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            border-left: 4px solid #ffc107;
+        }
+        .success {
+            background: #d4edda;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            border-left: 4px solid #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🔍 Check Your User Role</h1>
+        
+        <div class="info">
+            <strong>Purpose:</strong> This tool checks what role you're logged in as and helps you access the Analytics dashboard.
+        </div>
+
+        <button onclick="checkRole()">Check My Role</button>
+
+        <div id="result"></div>
+
+        <div class="info" style="margin-top: 30px;">
+            <strong>Quick Links:</strong><br>
+            <a href="http://localhost:4200/auth/login" target="_blank">Login Page</a> |
+            <a href="http://localhost:4200/admin/analytics" target="_blank">Analytics Dashboard (Direct)</a> |
+            <a href="http://localhost:4200/admin/dashboard" target="_blank">Admin Dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        function checkRole() {
+            const resultDiv = document.getElementById('result');
+            
+            // Check localStorage for user data
+            const currentUser = localStorage.getItem('currentUser');
+            const token = localStorage.getItem('token');
+            
+            if (!currentUser || !token) {
+                resultDiv.innerHTML = `
+                    <div class="warning">
+                        <h3>❌ Not Logged In</h3>
+                        <p>You are not currently logged in.</p>
+                        <p><strong>Action Required:</strong></p>
+                        <ol>
+                            <li>Go to <a href="http://localhost:4200/auth/login" target="_blank">Login Page</a></li>
+                            <li>Login with ADMIN credentials</li>
+                            <li>After login, the Analytics button will appear in the navbar</li>
+                        </ol>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                const user = JSON.parse(currentUser);
+                const role = user.role || user.Role || 'Unknown';
+                
+                resultDiv.innerHTML = `
+                    <div class="result">
+                        <h3>👤 Current User Info:</h3>
+                        <p><strong>Name:</strong> ${user.firstName || user.FirstName || 'N/A'} ${user.lastName || user.LastName || ''}</p>
+                        <p><strong>Email:</strong> ${user.email || user.Email || 'N/A'}</p>
+                        <p><strong>Role:</strong> ${role}</p>
+                        <p><strong>User ID:</strong> ${user.userId || user.UserId || 'N/A'}</p>
+                    </div>
+                `;
+
+                if (role.toLowerCase() === 'admin') {
+                    resultDiv.innerHTML += `
+                        <div class="success">
+                            <h3>✅ You are logged in as ADMIN</h3>
+                            <p>You should see the Analytics button in the navbar.</p>
+                            <p><strong>If you don't see it:</strong></p>
+                            <ol>
+                                <li>Refresh the page (F5)</li>
+                                <li>Clear cache (Ctrl+Shift+Delete)</li>
+                                <li>Or click here: <a href="http://localhost:4200/admin/analytics" target="_blank">Go to Analytics Dashboard</a></li>
+                            </ol>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML += `
+                        <div class="warning">
+                            <h3>⚠️ You are logged in as ${role.toUpperCase()}</h3>
+                            <p>The Analytics dashboard is only available for ADMIN users.</p>
+                            <p><strong>To access Analytics:</strong></p>
+                            <ol>
+                                <li>Logout from current account</li>
+                                <li>Login with ADMIN credentials</li>
+                                <li>The Analytics button will appear in the navbar</li>
+                            </ol>
+                            <p><a href="http://localhost:4200/auth/login" target="_blank">Go to Login Page</a></p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="warning">
+                        <h3>❌ Error Reading User Data</h3>
+                        <p>Could not parse user information.</p>
+                        <p><strong>Recommendation:</strong> Logout and login again.</p>
+                        <p><a href="http://localhost:4200/auth/login" target="_blank">Go to Login Page</a></p>
+                    </div>
+                `;
+            }
+        }
+
+        // Auto-check on page load
+        window.onload = function() {
+            checkRole();
+        };
+    </script>
+</body>
+</html>

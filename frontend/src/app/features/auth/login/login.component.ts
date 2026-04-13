@@ -245,15 +245,24 @@ export class LoginComponent {
     if (this.loginForm.valid) {
       this.isLoading = true;
       this.authService.login(this.loginForm.value).subscribe({
-        next: (response) => {
+        next: (user) => {
           this.toastr.success('Login successful!', 'Welcome');
-          if (response.role === 'Admin') {
+          console.log('🎯 Login complete, user role:', user.role);
+          console.log('🎯 isAdmin():', this.authService.isAdmin());
+          console.log('🎯 isCustomer():', this.authService.isCustomer());
+          
+          // Use authService methods to check role (they read from storage)
+          if (this.authService.isAdmin()) {
+            console.log('🎯 Redirecting to /admin/dashboard');
             this.router.navigate(['/admin/dashboard']);
           } else {
+            console.log('🎯 Redirecting to /customer/dashboard');
             this.router.navigate(['/customer/dashboard']);
           }
         },
-        error: () => {
+        error: (error) => {
+          console.error('❌ Login error:', error);
+          this.toastr.error('Login failed. Please check your credentials.', 'Error');
           this.isLoading = false;
         },
         complete: () => {

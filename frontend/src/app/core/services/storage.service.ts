@@ -34,9 +34,22 @@ export class StorageService {
     return user ? JSON.parse(user) : null;
   }
 
+  setItem(key: string, value: string): void {
+    localStorage.setItem(`smartsure_${key}`, value);
+  }
+
+  getItem(key: string): string | null {
+    return localStorage.getItem(`smartsure_${key}`);
+  }
+
+  removeItem(key: string): void {
+    localStorage.removeItem(`smartsure_${key}`);
+  }
+
   clear(): void {
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.REFRESH_TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);
+    localStorage.removeItem('smartsure_loginRole');
   }
 }

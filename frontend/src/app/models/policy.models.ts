@@ -19,25 +19,34 @@ export interface InsuranceSubtype {
 
 export interface Policy {
   policyId: string;
+  formattedPolicyId?: string; // Backend computed property (POL-xxxxx)
   userId: string;
+  formattedUserId?: string; // Backend computed property (SSUSER-xxxxx)
   subtypeId: string;
-  policyNumber: string;
+  formattedSubtypeId?: string; // Backend computed property (PLAN-xxxxx)
   status: PolicyStatus;
   startDate: string;
   endDate: string;
   premiumAmount: number;
-  coverageAmount: number;
-  idv: number;
-  approvedClaimsCount: number;
-  createdAt: string;
-  updatedAt: string;
+  insuredDeclaredValue: number; // Backend field name
+  idv?: number; // Alias for insuredDeclaredValue
+  coverageAmount?: number; // Legacy field
+  approvedClaimsCount?: number;
   insuranceSubtype?: InsuranceSubtype;
+  subtypeName?: string; // From backend
+  typeName?: string; // From backend
+  nomineeName?: string; // From backend
+  nomineeRelation?: string; // From backend
   // Extended properties for display
   insuranceTypeName?: string;
   insuredName?: string;
   insuredDOB?: string;
   insuredPhone?: string;
   insuredAddress?: string;
+  // Computed properties for display
+  policyNumber?: string; // Alias for formattedPolicyId
+  createdAt?: string; // Use startDate as fallback
+  updatedAt?: string;
 }
 
 export enum PolicyStatus {
@@ -97,11 +106,19 @@ export interface PolicyDetail {
 
 export interface QuoteResponse {
   subtypeId: string;
-  coverageAmount: number;
-  idv: number;
+  subtypeName: string;
+  typeName: string;
+  duration: number;
+  insuredDeclaredValue: number;
+  premiumAmount: number;
+  breakdown: string;
+}
+// Add this interface after QuoteResponse
+export interface DisplayQuote {
   basePremium: number;
   gst: number;
   totalPremium: number;
+  idv: number;
   startDate: string;
   endDate: string;
 }

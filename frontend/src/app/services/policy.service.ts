@@ -41,7 +41,7 @@ export class PolicyService {
     return this.http.get<Policy>(`${this.apiUrl}/policies/${policyId}`);
   }
 
-  getQuote(data: CreatePolicyRequest): Observable<QuoteResponse> {
+  getQuote(data: any): Observable<any> {
     return this.http.post<QuoteResponse>(`${this.apiUrl}/policies/quote`, data);
   }
 
