@@ -8,6 +8,7 @@ import { MatTableModule } from '@angular/material/table';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { FooterComponent } from '../../../shared/components/footer/footer.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
+import { AiChatWidgetComponent } from '../../../shared/components/ai-chat-widget/ai-chat-widget.component';
 import { PolicyService } from '../../../services/policy.service';
 import { ClaimService } from '../../../services/claim.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -26,7 +27,8 @@ import { Claim } from '../../../models/claim.models';
     MatTableModule,
     NavbarComponent,
     FooterComponent,
-    StatusBadgeComponent
+    StatusBadgeComponent,
+    AiChatWidgetComponent
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']

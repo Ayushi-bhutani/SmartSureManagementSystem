@@ -1,0 +1,111 @@
+<!-- Floating Chat Button -->
+<button 
+  *ngIf="!isOpen" 
+  class="chat-fab" 
+  mat-fab 
+  color="primary"
+  (click)="toggleChat()"
+  matTooltip="Ask AI Assistant"
+  matTooltipPosition="left">
+  <mat-icon>smart_toy</mat-icon>
+</button>
+
+<!-- Chat Window -->
+<div class="chat-window" [class.open]="isOpen" [class.minimized]="isMinimized">
+  <!-- Chat Header -->
+  <div class="chat-header">
+    <div class="header-content">
+      <div class="ai-avatar">
+        <mat-icon>smart_toy</mat-icon>
+      </div>
+      <div class="header-text">
+        <h3>AI Assistant</h3>
+        <span class="status">
+          <span class="status-dot"></span>
+          Online
+        </span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button mat-icon-button (click)="minimizeChat()" matTooltip="Minimize">
+        <mat-icon>{{ isMinimized ? 'expand_less' : 'expand_more' }}</mat-icon>
+      </button>
+      <button mat-icon-button (click)="clearChat()" matTooltip="Clear chat">
+        <mat-icon>delete_outline</mat-icon>
+      </button>
+      <button mat-icon-button (click)="closeChat()" matTooltip="Close">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Chat Messages -->
+  <div class="chat-messages" #messagesContainer *ngIf="!isMinimized">
+    <div *ngFor="let message of messages" 
+         class="message-wrapper"
+         [class.user-message]="message.type === 'user'"
+         [class.ai-message]="message.type === 'ai'">
+      
+      <div class="message-bubble">
+        <div class="message-content" [innerHTML]="formatMessageText(message.text)"></div>
+        <div class="message-time">
+          {{ message.timestamp | date:'shortTime' }}
+        </div>
+      </div>
+
+      <!-- Suggestions -->
+      <div class="suggestions" *ngIf="message.type === 'ai' && message.suggestions && message.suggestions.length > 0">
+        <button 
+          *ngFor="let suggestion of message.suggestions"
+          mat-stroked-button
+          class="suggestion-chip"
+          (click)="selectSuggestion(suggestion)">
+          {{ suggestion }}
+        </button>
+      </div>
+
+      <!-- Action Button -->
+      <div class="action-button-container" *ngIf="message.type === 'ai' && message.actionButton">
+        <button 
+          mat-raised-button
+          color="primary"
+          class="action-button"
+          (click)="navigateToAction(message.actionButton.route)">
+          <mat-icon *ngIf="message.actionButton.icon">{{ message.actionButton.icon }}</mat-icon>
+          {{ message.actionButton.text }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Typing Indicator -->
+    <div class="message-wrapper ai-message" *ngIf="isTyping">
+      <div class="message-bubble typing-indicator">
+        <div class="typing-dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat Input -->
+  <div class="chat-input" *ngIf="!isMinimized">
+    <mat-form-field appearance="outline" class="input-field">
+      <input 
+        matInput 
+        [(ngModel)]="userInput"
+        (keyup.enter)="sendMessage()"
+        placeholder="Type your question..."
+        [disabled]="isTyping">
+    </mat-form-field>
+    <button 
+      mat-fab 
+      color="primary" 
+      class="send-button"
+      (click)="sendMessage()"
+      [disabled]="!userInput.trim() || isTyping">
+      <mat-icon>send</mat-icon>
+    </button>
+  </div>
+</div>

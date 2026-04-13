@@ -75,10 +75,10 @@ import { AuthService } from '../../../core/services/auth.service';
                       (click)="hideConfirmPassword = !hideConfirmPassword">
                 <mat-icon>{{hideConfirmPassword ? 'visibility_off' : 'visibility'}}</mat-icon>
               </button>
-              <mat-error *ngIf="resetForm.get('confirmPassword')?.hasError('required')">
+              <mat-error *ngIf="resetForm.get('confirmPassword')?.hasError('required') && resetForm.get('confirmPassword')?.touched">
                 Please confirm your password
               </mat-error>
-              <mat-error *ngIf="resetForm.hasError('passwordMismatch')">
+              <mat-error *ngIf="resetForm.hasError('passwordMismatch') && resetForm.get('confirmPassword')?.dirty">
                 Passwords do not match
               </mat-error>
             </mat-form-field>
@@ -202,7 +202,14 @@ export class ResetPasswordComponent implements OnInit {
   passwordMatchValidator(group: FormGroup): { [key: string]: boolean } | null {
     const password = group.get('newPassword')?.value;
     const confirmPassword = group.get('confirmPassword')?.value;
-    return password === confirmPassword ? null : { passwordMismatch: true };
+    
+    // Only validate if both fields have values
+    if (!password || !confirmPassword) {
+      return null;
+    }
+    
+    // Trim whitespace and compare
+    return password.trim() === confirmPassword.trim() ? null : { passwordMismatch: true };
   }
 
   onSubmit(): void {
