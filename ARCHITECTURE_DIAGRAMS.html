@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartSure Architecture </title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 40px;
+            border-left: 5px solid #667eea;
+            padding-left: 15px;
+        }
+        h3 {
+            color: #555;
+            margin-top: 30px;
+        }
+        .diagram-container {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .mermaid {
+            text-align: center;
+        }
+        .note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .info {
+            background: #d1ecf1;
+            border-left: 4px solid #0dcaf0;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🏗️ SmartSure Architecture Diagrams</h1>
+
+
+    
+
+    <h2> HIGH-LEVEL DESIGN (HLD)</h2>
+    
+    <h3> System Architecture Overview</h3>
+    <div class="diagram-container">
+        <div class="mermaid">
+graph TB
+    subgraph "Client Layer"
+        Browser[Web Browser]
+        Mobile[Mobile Browser]
+    end
+    
+    subgraph "Presentation Layer - Angular 18"
+        Angular[Angular Application<br/>Port: 4200]
+        Guards[Route Guards<br/>Auth, Customer, Admin]
+        Interceptors[HTTP Interceptors<br/>Auth, Error, Loading]
+    end
+    
+    subgraph "API Gateway Layer"
+        Gateway[Ocelot API Gateway<br/>Port: 5000<br/>JWT Validation<br/>Rate Limiting<br/>Load Balancing]
+    end
+    
+    subgraph "Microservices Layer"
+        Identity[Identity Service<br/>Port: 5001<br/>Authentication<br/>User Management]
+        Policy[Policy Service<br/>Port: 5002<br/>Policy Management<br/>Premium Calculation]
+        Claims[Claims Service<br/>Port: 5003<br/>Claim Processing<br/>Document Management]
+        Admin[Admin Service<br/>Port: 5004<br/>Analytics<br/>Reports<br/>Approvals]
+    end
+    
+    subgraph "Data Layer"
+        DB1[(SmartSure_Identity<br/>SQL Server)]
+        DB2[(SmartSure_Policy<br/>SQL Server)]
+        DB3[(SmartSure_Claims<br/>SQL Server)]
+    end
+    
+    subgraph "Message Queue"
+        RabbitMQ[RabbitMQ<br/>Event Bus<br/>Async Communication]
+    end
+    
+    Browser --> Angular
+    Mobile --> Angular
+    Angular --> Guards
+    Angular --> Interceptors
+    Interceptors --> Gateway
+    
+    Gateway --> Identity
+    Gateway --> Policy
+    Gateway --> Claims
+    Gateway --> Admin
+    
+    Identity --> DB1
+    Policy --> DB2
+    Claims --> DB3
+    Admin --> DB1
+    Admin --> DB2
+    Admin --> DB3
+    
+    Identity -.->|Events| RabbitMQ
+    Policy -.->|Events| RabbitMQ
+    Claims -.->|Events| RabbitMQ
+    RabbitMQ -.->|Subscribe| Admin
+    
+    style Gateway fill:#667eea
+    style Angular fill:#dd0031
+    style Identity fill:#4caf50
+    style Policy fill:#2196f3
+    style Claims fill:#ff9800
+    style Admin fill:#9c27b0
+        </div>
+    </div>
+
+   
+    <h2> LOW-LEVEL DESIGN (LLD)</h2>
+    
+    <h3> Identity Service Architecture</h3>
+    <div class="diagram-container">
+        <div class="mermaid">
+graph TB
+    subgraph "Identity Service - Port 5001"
+        subgraph "Controllers"
+            AuthController[AuthController<br/>Login, Register<br/>ForgotPassword, ResetPassword]
+            UserController[UserController<br/>GetProfile, UpdateProfile]
+        end
+        
+        subgraph "Services"
+            AuthService[AuthService<br/>JWT Generation<br/>Password Hashing<br/>OTP Management]
+            UserService[UserService<br/>User CRUD<br/>Role Management]
+            EmailService[EmailService<br/>Send OTP<br/>Send Notifications]
+        end
+        
+        subgraph "Repositories"
+            UserRepo[UserRepository<br/>IUserRepository]
+        end
+        
+        subgraph "Data"
+            IdentityContext[IdentityDbContext<br/>EF Core]
+        end
+        
+        subgraph "Models"
+            User[User<br/>Id, Email, Password<br/>FirstName, LastName<br/>RoleName, PassId]
+            OTP[OTP<br/>Code, Email<br/>ExpiresAt]
+        end
+    end
+    
+    AuthController --> AuthService
+    UserController --> UserService
+    AuthService --> UserRepo
+    UserService --> UserRepo
+    AuthService --> EmailService
+    UserRepo --> IdentityContext
+    IdentityContext --> User
+    IdentityContext --> OTP
+    
+    subgraph "Database"
+        DB1[(SmartSure_Identity)]
+    end
+    
+    IdentityContext --> DB1
+        </div>
+    </div>
+
+    <h3> Policy Service Architecture</h3>
+    <div class="diagram-container">
+        <div class="mermaid">
+graph TB
+    subgraph "Policy Service - Port 5014"
+        subgraph "Controllers"
+            PolicyController[PoliciesController<br/>GetPolicies, CreatePolicy<br/>GetUserPolicies<br/>CalculatePremium]
+            InsuranceController[InsuranceController<br/>GetTypes, GetSubtypes]
+            DiscountController[DiscountsController<br/>GetDiscounts, ValidateCoupon]
+            PaymentController[PaymentsController<br/>CreatePayment, GetPayments]
+        end
+        
+        subgraph "Services"
+            PolicyService[PolicyMgmtService<br/>Policy CRUD<br/>Premium Calculation<br/>Policy Validation]
+            InsuranceService[InsuranceService<br/>Type Management<br/>Subtype Management]
+            DiscountService[DiscountService<br/>Coupon Validation<br/>Discount Calculation]
+            PaymentService[PaymentService<br/>Payment Processing]
+            RazorpayService[RazorpayService<br/>Payment Gateway Integration]
+        end
+        
+        subgraph "Repositories"
+            PolicyRepo[PolicyRepository<br/>IPolicyRepository]
+            InsuranceRepo[InsuranceRepository<br/>IInsuranceRepository]
+            DiscountRepo[DiscountRepository<br/>IDiscountRepository]
+            PaymentRepo[PaymentRepository<br/>IPaymentRepository]
+        end
+        
+        subgraph "Data"
+            PolicyContext[PolicyDbContext<br/>EF Core]
+        end
+        
+        subgraph "Models"
+            Policy[Policy<br/>PolicyId, UserId<br/>SubtypeId, PremiumAmount<br/>InsuredDeclaredValue<br/>Status, StartDate, EndDate]
+            InsuranceType[InsuranceType<br/>TypeId, Name<br/>Description]
+            InsuranceSubtype[InsuranceSubtype<br/>SubtypeId, TypeId<br/>Name, BasePremium]
+            VehicleDetail[VehicleDetail<br/>RegistrationNumber<br/>Make, Model, Year]
+            HomeDetail[HomeDetail<br/>Address, PropertyType<br/>AreaSqFt, YearBuilt]
+            Payment[Payment<br/>PaymentId, Amount<br/>Status, Method]
+            Discount[Discount<br/>Code, Percentage<br/>ValidFrom, ValidUntil]
+        end
+    end
+    
+    PolicyController --> PolicyService
+    InsuranceController --> InsuranceService
+    DiscountController --> DiscountService
+    PaymentController --> PaymentService
+    
+    PolicyService --> PolicyRepo
+    InsuranceService --> InsuranceRepo
+    DiscountService --> DiscountRepo
+    PaymentService --> PaymentRepo
+    PaymentService --> RazorpayService
+    
+    PolicyRepo --> PolicyContext
+    InsuranceRepo --> PolicyContext
+    DiscountRepo --> PolicyContext
+    PaymentRepo --> PolicyContext
+    
+    PolicyContext --> Policy
+    PolicyContext --> InsuranceType
+    PolicyContext --> InsuranceSubtype
+    PolicyContext --> VehicleDetail
+    PolicyContext --> HomeDetail
+    PolicyContext --> Payment
+    PolicyContext --> Discount
+    
+    subgraph "Database"
+        DB2[(SmartSure_Policy)]
+    end
+    
+    PolicyContext --> DB2
+        </div>
+    </div>
+
+    <h3> Claims Service Architecture</h3>
+    <div class="diagram-container">
+        <div class="mermaid">
+graph TB
+    subgraph "Claims Service - Port 5265"
+        subgraph "Controllers"
+            ClaimController[ClaimsController<br/>GetClaims, CreateClaim<br/>UpdateStatus<br/>GetUserClaims]
+            DocumentController[ClaimDocumentsController<br/>UploadDocument<br/>GetDocuments<br/>DeleteDocument]
+        end
+        
+        subgraph "Services"
+            ClaimService[ClaimService<br/>Claim CRUD<br/>Status Management<br/>Claim Validation<br/>Workflow Engine]
+            DocumentService[DocumentService<br/>File Upload<br/>File Validation<br/>Mega.nz Integration]
+            EmailService[EmailService<br/>Claim Notifications<br/>Status Updates]
+        end
+        
+        subgraph "Repositories"
+            ClaimRepo[ClaimRepository<br/>IClaimRepository]
+            DocumentRepo[ClaimDocumentRepository<br/>IClaimDocumentRepository]
+            HistoryRepo[ClaimStatusHistoryRepository<br/>IClaimStatusHistoryRepository]
+        end
+        
+        subgraph "Data"
+            ClaimContext[ClaimsDbContext<br/>EF Core]
+        end
+        
+        subgraph "Models"
+            Claim[Claim<br/>ClaimId, PolicyId<br/>UserId, ClaimAmount<br/>Status, ClaimType<br/>IsCompletelyDamaged]
+            ClaimDocument[ClaimDocument<br/>DocumentId, ClaimId<br/>FileName, FileUrl<br/>ContentType, FileSize]
+            ClaimHistory[ClaimStatusHistory<br/>Id, ClaimId<br/>OldStatus, NewStatus<br/>ChangedBy, Notes]
+        end
+    end
+    
+    ClaimController --> ClaimService
+    DocumentController --> DocumentService
+    
+    ClaimService --> ClaimRepo
+    ClaimService --> HistoryRepo
+    ClaimService --> EmailService
+    DocumentService --> DocumentRepo
+    
+    ClaimRepo --> ClaimContext
+    DocumentRepo --> ClaimContext
+    HistoryRepo --> ClaimContext
+    
+    ClaimContext --> Claim
+    ClaimContext --> ClaimDocument
+    ClaimContext --> ClaimHistory
+    
+    subgraph "Database"
+        DB3[(SmartSure_Claims)]
+    end
+    
+    ClaimContext --> DB3
+        </div>
+    </div>
+
+    <h3> Admin Service Architecture</h3>
+    <div class="diagram-container">
+        <div class="mermaid">
+graph TB
+    subgraph "Admin Service - Port 5232"
+        subgraph "Controllers"
+            DashboardController[DashboardController<br/>GetStats<br/>GetAnalytics<br/>Real-time Metrics]
+            AdminClaimController[AdminClaimsController<br/>GetAllClaims<br/>ApproveClaim<br/>RejectClaim]
+            AdminPolicyController[AdminPoliciesController<br/>GetAllPolicies<br/>CancelPolicy]
+            AdminUserController[AdminUsersController<br/>GetAllUsers<br/>ManageRoles]
+            ReportController[ReportsController<br/>GenerateReport<br/>ExportPDF, ExportCSV]
+            AuditController[AuditLogsController<br/>GetAuditLogs<br/>SearchLogs]
+        end
+        
+        subgraph "Services"
+            DashboardService[DashboardService<br/>Aggregate Statistics<br/>Multi-DB Queries]
+            AdminClaimService[AdminClaimService<br/>Claim Review<br/>Approval Workflow]
+            ReportService[ReportService<br/>Report Generation<br/>Data Aggregation]
+            PdfService[PdfGeneratorService<br/>PDF Creation<br/>Template Rendering]
+            AuditService[AuditService<br/>Audit Logging<br/>Activity Tracking]
+        end
+        
+        subgraph "Repositories"
+            ReportRepo[ReportRepository<br/>IReportRepository]
+            AuditRepo[AuditLogRepository<br/>IAuditLogRepository]
+        end
+        
+        subgraph "Data Access"
+            AdminContext[AdminDbContext<br/>EF Core]
+            MultiDbAccess[Multi-Database Access<br/>Identity DB Connection<br/>Policy DB Connection<br/>Claims DB Connection]
+        end
+        
+        subgraph "Models"
+            Report[Report<br/>ReportId, Title<br/>ReportType, Format<br/>Content, GeneratedBy<br/>DateRangeStart, DateRangeEnd]
+            AuditLog[AuditLog<br/>Id, Action<br/>EntityType, EntityId<br/>ActorId, Details<br/>Timestamp]
+        end
+    end
+    
+    DashboardController --> DashboardService
+    AdminClaimController --> AdminClaimService
+    AdminPolicyController --> DashboardService
+    AdminUserController --> DashboardService
+    ReportController --> ReportService
+    AuditController --> AuditService
+    
+    DashboardService --> MultiDbAccess
+    AdminClaimService --> MultiDbAccess
+    ReportService --> ReportRepo
+    ReportService --> PdfService
+    ReportService --> MultiDbAccess
+    AuditService --> AuditRepo
+    
+    ReportRepo --> AdminContext
+    AuditRepo --> AdminContext
+    
+    AdminContext --> Report
+    AdminContext --> AuditLog
+    
+    subgraph "Databases"
+        DB4[(SmartSure_Admin)]
+        DB1[(SmartSure_Identity<br/>Read-Only)]
+        DB2[(SmartSure_Policy<br/>Read-Only)]
+        DB3[(SmartSure_Claims<br/>Read-Only)]
+    end
+    
+    AdminContext --> DB4
+    MultiDbAccess --> DB1
+    MultiDbAccess --> DB2
+    MultiDbAccess --> DB3
+        </div>
+    </div>
+
+    
+
+    <h2> SEQUENCE DIAGRAMS</h2>
+    
+    <h3> Policy Purchase Flow</h3>
+    <div class="diagram-container">
+        <div class="mermaid">
+sequenceDiagram
+    actor Customer
+    participant Angular
+    participant Gateway
+    participant Policy
+    participant DB
+    participant RabbitMQ
+    
+    Customer->>Angular: Select Insurance Type
+    Angular->>Gateway: GET /gateway/policies/types
+    Gateway->>Policy: GET /api/insurance/types
+    Policy->>DB: SELECT Types
+    DB-->>Policy: Types Data
+    Policy-->>Gateway: Types List
+    Gateway-->>Angular: Types
+    Angular-->>Customer: Display Types
+    
+    Customer->>Angular: Fill Policy Details
+    Angular->>Gateway: POST /gateway/policies/calculate-premium
+    Gateway->>Policy: POST /api/policies/calculate-premium
+    Policy->>Policy: Calculate Premium
+    Policy-->>Gateway: Premium Amount
+    Gateway-->>Angular: Premium
+    Angular-->>Customer: Show Premium
+    
+    Customer->>Angular: Confirm Purchase
+    Angular->>Gateway: POST /gateway/policies
+    Gateway->>Policy: POST /api/policies
+    Policy->>DB: INSERT Policy
+    DB-->>Policy: Policy Created
+    Policy->>RabbitMQ: Publish PolicyCreated Event
+    Policy-->>Gateway: Policy Data
+    Gateway-->>Angular: Success
+    Angular-->>Customer: Policy Purchased
+        </div>
+    </div>
+
+    <h3> JWT Authentication Flow</h3>
+    <div class="diagram-container">
+        <div class="mermaid">
+sequenceDiagram
+    actor User
+    participant Angular
+    participant Gateway
+    participant Identity
+    participant DB
+    
+    User->>Angular: Enter Credentials
+    Angular->>Gateway: POST /gateway/auth/login
+    Gateway->>Identity: POST /api/auth/login
+    Identity->>DB: SELECT User WHERE Email
+    DB-->>Identity: User Data
+    Identity->>Identity: Verify Password (BCrypt)
+    Identity->>Identity: Generate JWT Token<br/>(Claims: Id, Email, Role)
+    Identity-->>Gateway: JWT Token + User Info
+    Gateway-->>Angular: Token
+    Angular->>Angular: Store Token in LocalStorage
+    Angular-->>User: Redirect to Dashboard
+    
+    Note over User,DB: Subsequent Requests
+    
+    User->>Angular: Access Protected Route
+    Angular->>Angular: Add Authorization Header<br/>Bearer {token}
+    Angular->>Gateway: GET /gateway/policies<br/>Authorization: Bearer {token}
+    Gateway->>Gateway: Validate JWT Token<br/>(Signature, Expiry, Claims)
+    Gateway->>Policy: GET /api/policies
+    Policy-->>Gateway: Policies Data
+    Gateway-->>Angular: Response
+    Angular-->>User: Display Data
+        </div>
+    </div>
+
+    <h2> STATE DIAGRAMS</h2>
+    
+    <h3>Policy Lifecycle</h3>
+    <div class="diagram-container">
+        <div class="mermaid">
+stateDiagram-v2
+    [*] --> Draft: Customer Initiates
+    Draft --> Active: Payment Successful
+    Active --> Expired: End Date Reached
+    Active --> Cancelled: Admin/Customer Cancels
+    Expired --> [*]
+    Cancelled --> [*]
+    
+    note right of Draft
+        Customer fills details
+        Premium calculated
+    end note
+    
+    note right of Active
+        Policy is live
+        Claims can be filed
+    end note
+        </div>
+    </div>
+
+    <h3> Claim Lifecycle</h3>
+    <div class="diagram-container">
+        <div class="mermaid">
+stateDiagram-v2
+    [*] --> Draft: Customer Initiates
+    Draft --> Submitted: Customer Submits
+    Submitted --> UnderReview: Admin Reviews
+    UnderReview --> Approved: Admin Approves
+    UnderReview --> Rejected: Admin Rejects
+    Approved --> Settled: Payment Processed
+    Settled --> [*]
+    Rejected --> [*]
+    
+    note right of Submitted
+        Documents uploaded
+        Waiting for admin
+    end note
+    
+    note right of UnderReview
+        Admin verifying
+        documents and details
+    end note
+    
+    note right of Approved
+        Claim amount approved
+        Payment in progress
+    end note
+        </div>
+    </div>
+
+   
+   
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+    </script>
+</body>
+</html>
