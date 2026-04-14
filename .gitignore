@@ -77,3 +77,14 @@ node_modules/
 dist/
 .angular/
 *.tsbuildinfo
+
+# Interview preparation files (local only)
+INTERVIEW_*.md
+*_GUIDE.md
+*_REFERENCE.md
+DEMO_DATA_REFERENCE.md
+TESTING_GUIDE.md
+AI_ASSISTANT_*.md
+AI_DEMO_SCRIPT.md
+ADMIN_LOGIN_GUIDE.md
+API_REFERENCE.md
